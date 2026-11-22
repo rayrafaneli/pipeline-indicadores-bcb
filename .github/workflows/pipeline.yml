@@ -1,0 +1,25 @@
+name: Pipeline de indicadores
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 10 5 * *"   # todo dia 5, 07:00 (Brasília)
+  push:
+    branches: [main]
+
+jobs:
+  etl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt pytest
+      - run: pytest -q
+      - name: Extração, transformação, carga e qualidade
+        run: python run.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: indicadores-duckdb
+          path: data/indicadores.duckdb
